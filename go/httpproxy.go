@@ -81,14 +81,11 @@ func (h *HTTPConnectProxyServer) handler(w http.ResponseWriter, r *http.Request)
 		// Artifically wait for the first client packet before falling into full duplex mode.
 		// This is a workaround for the issue being demonstrated here.
 		buf := make([]byte, 32 * 1024)
-		readBytes, err := targetConn.Read(buf)
+		readBytes, err := clientConn.Read(buf)
 		if err != nil {
 			panic(fmt.Sprintf("Expected client to send a first packet: %v", err))
 		}
-		if err := res.Write(clientConn); err != nil {
-			panic(fmt.Sprintf("Writing 200 OK failed: %v", err))
-		}
-		if _, err := clientConn.Write(buf[:readBytes]); err != nil {
+		if _, err := targetConn.Write(buf[:readBytes]); err != nil {
 			panic(fmt.Sprintf("Sending client's first packet to server failed: %v", err))
 		}
 	}
